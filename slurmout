@@ -1,0 +1,25 @@
+#!/bin/bash
+#SBATCH --job-name=LHS3844b
+#SBATCH --nodes=1 --ntasks-per-node=16
+#SBATCH --time=600
+#SBATCH --partition=medium
+#SBATCH --mem=10gb
+
+## Définir le répertoire scratch et recopier les fichiers nécessaires à l'exécution
+
+CURRENT_DIR="$(pwd)"
+SCRATCH=/scratch/$USER/run.${SLURM_JOBID}
+mkdir -p $SCRATCH
+cd $SCRATCH
+cp $CURRENT_DIR/tycho_job.py .
+cp $CURRENT_DIR/LHS3844b_0.0_1obs.pickle .
+cp $CURRENT_DIR/LHS3844b_phase_curve_max_1obs.pickle .
+
+export OMP_NUM_THREADS=32
+source ~/envs/astro311/bin/activate
+python3 tycho_job.py > log.out
+
+mv * /obs/orering/elsa
+rm -rf ${SCRATCH}
+
+exit 0
